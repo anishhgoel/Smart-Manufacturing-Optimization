@@ -71,17 +71,61 @@ class CNCPINN(nn.Module):
             # forward pass
             y_pred = model(x_train)
             
-            # alculation losses
+            # calculating losses
             data_loss = data_criterion(y_pred, y_train)
             physics_loss = model.physics_loss(x_train, y_pred)
             
-            # Total loss
+            # combine losses
             total_loss = data_loss + 0.1 * physics_loss
             
-            # Backward pass
+            # backward pass and optimization
             total_loss.backward()
-            # making adjustmwnts to weights and biases
             optimizer.step()
             
             if epoch % 100 == 0:
-                print(f'Epoch {epoch}: Data Loss = {data_loss.item():.4f}, Physics Loss = {physics_loss.item():.4f}')
+                print(f'Epoch {epoch}: Data Loss = {data_loss.item():.4f}, '
+                    f'Physics Loss = {physics_loss.item():.4f}')
+
+    
+
+    def prepare_training_data(generator_class, n_samples=1000):
+        """
+        Prepare training data from CNC data generator
+        
+        Parameters:
+            generator_class: The CNCDataGenerator class
+            n_samples: Number of samples to generate
+        Returns:
+            x_train: Tensor of input parameters (cutting_speed, feed_rate, material_hardness)
+            y_train: Tensor of temperature values
+        """
+        # Generate data points across parameter ranges
+        cutting_speeds = np.linspace(50, 200, 10)  # 50-200 m/min
+        feed_rates = np.linspace(0.1, 0.4, 10)    # 0.1-0.4 mm/rev
+        materials = [75, 150]                      # Aluminum and Steel
+        
+        inputs = []
+        outputs = []
+        time_points = np.linspace(0, 100, 100)    # 100 seconds simulation
+        
+        for cs in cutting_speeds:
+            for fr in feed_rates:
+                for mh in materials:
+                    # Create generator instance with these parameters
+                    generator = generator_class(
+                        cutting_speed=cs,
+                        feed_rate=fr,
+                        material_hardness=mh
+                    )
+                    # Calculate temperature profile
+                    temp = generator.calculate_temperature(time_points)
+                    
+                    # Store input parameters and resulting temperature
+                    inputs.append([cs, fr, mh])
+                    outputs.append(np.mean(temp))  # Use mean temperature as target
+        
+        # Convert to PyTorch tensors
+        x_train = torch.tensor(inputs, dtype=torch.float32)
+        y_train = torch.tensor(outputs, dtype=torch.float32).reshape(-1, 1)
+        
+        return x_train, y_train
