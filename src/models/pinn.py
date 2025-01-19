@@ -54,3 +54,34 @@ class CNCPINN(nn.Module):
         )
         
         return physics_loss
+    
+    
+    def train_pinn(model, x_train, y_train, epochs=1000):
+        """
+        training the PINN model with both data and physics losses
+        """
+        # using adam( daptive Moment Estimation) optimizing algo since it used momentum and has adaptive learning rate. we specify base lr/ adam 
+        # determines learning rate and multiplies with base learning rate we provide
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+        data_criterion = nn.MSELoss()
+        
+        for epoch in range(epochs):
+            optimizer.zero_grad()
+            
+            # forward pass
+            y_pred = model(x_train)
+            
+            # alculation losses
+            data_loss = data_criterion(y_pred, y_train)
+            physics_loss = model.physics_loss(x_train, y_pred)
+            
+            # Total loss
+            total_loss = data_loss + 0.1 * physics_loss
+            
+            # Backward pass
+            total_loss.backward()
+            # making adjustmwnts to weights and biases
+            optimizer.step()
+            
+            if epoch % 100 == 0:
+                print(f'Epoch {epoch}: Data Loss = {data_loss.item():.4f}, Physics Loss = {physics_loss.item():.4f}')
