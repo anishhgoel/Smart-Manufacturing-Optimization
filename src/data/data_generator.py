@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from ..models.pinn import CNCPINN
+from ..models.pinn import CNCPINN, prepare_training_data, train_pinn
 from ..models.vibration_model import calculate_vibration, add_vibration_noise
 from ..models.wear_model import calculate_tool_wear
 
@@ -18,13 +18,13 @@ class CNCDataGenerator:
     def train_with_pinn(self, n_samples=1000):
         """Train PINN model with generated data"""
         # Create training data using our generator settings
-        x_train, y_train = CNCPINN.prepare_training_data(
+        x_train, y_train = prepare_training_data(
             self.__class__,  # Pass generator class
             n_samples
         )
         # Initialize and train PINN model
         self.pinn_model = CNCPINN()
-        CNCPINN.train_pinn(self.pinn_model, x_train, y_train)
+        train_pinn(self.pinn_model, x_train, y_train)
 
     def calculate_temperature(self, time_points):
         """
