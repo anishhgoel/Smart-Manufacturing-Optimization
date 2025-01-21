@@ -96,36 +96,37 @@ def prepare_training_data(generator_class, n_samples=1000):
         generator_class: The CNCDataGenerator class
         n_samples: Number of samples to generate
     Returns:
-        x_train: Tensor of input parameters (cutting_speed, feed_rate, material_hardness)
+        x_train: Tensor of input parameters (cutting_speed, feed_rate, material_hardness, time)
         y_train: Tensor of temperature values
     """
-    # Generate data points across parameter ranges
-    cutting_speeds = np.linspace(50, 200, 10)  # 50-200 m/min
-    feed_rates = np.linspace(0.1, 0.4, 10)    # 0.1-0.4 mm/rev
-    materials = [75, 150]                      # Aluminum and Steel
+    # choosing ranges of parametes; is customizable
+    cutting_speeds = np.linspace(50, 200, 5)   
+    feed_rates = np.linspace(0.1, 0.4, 5)
+    materials = [75, 150]
+    
+    # diff times to sample, kinda like 0 -> 100 in steps of 10
+    time_array = np.linspace(0, 100, 11)
     
     inputs = []
     outputs = []
-    time_points = np.linspace(0, 100, 100)    # 100 seconds simulation
     
     for cs in cutting_speeds:
         for fr in feed_rates:
             for mh in materials:
-                # Create generator instance with these parameters
-                generator = generator_class(
+                # instantiating the generator with these params
+                gen = generator_class(
                     cutting_speed=cs,
                     feed_rate=fr,
                     material_hardness=mh
                 )
-                # Calculate temperature profile
-                temp = generator.calculate_temperature(time_points)
+                # the temperature curve at times
+                temps = gen.calculate_temperature(time_array)
                 
-                # Store input parameters and resulting temperature
-                inputs.append([cs, fr, mh])
-                outputs.append(np.mean(temp))  # Use mean temperature as target
+                #  storing: (cs, fr, mh, t) -> T for each step
+                for t_val, temp_val in zip(time_array, temps):
+                    inputs.append([cs, fr, mh, t_val])
+                    outputs.append(temp_val)
     
-    # Convert to PyTorch tensors
     x_train = torch.tensor(inputs, dtype=torch.float32)
     y_train = torch.tensor(outputs, dtype=torch.float32).reshape(-1, 1)
-    
     return x_train, y_train
