@@ -4,10 +4,10 @@ import numpy as np
 
 
 class CNCPINN(nn.Module):
-    def __init__(self, input_dim=3, hidden_dim=50, output_dim=1):
+    def __init__(self, input_dim=4, hidden_dim=50, output_dim=1):
         """
         PINN for CNC machine temperature prediction
-        input_dim: cutting_speed, feed_rate, material_hardness
+        input_dim: cutting_speed, feed_rate, material_hardness, time
         output_dim: temperature
         """
         super().__init__()

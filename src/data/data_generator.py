@@ -62,41 +62,41 @@ class CNCDataGenerator:
 
 
     # In data_generator.py
-def generate_full_dataset(self, duration=1000, sample_rate=1):
-        """
-        generating a complete dataset including all machine parameters and sensor readings to simulate real machine
-        """
-        time_points = np.linspace(0, duration, int(duration * sample_rate))
-        
-        # primary measurements
-        temperature = self.calculate_temperature(time_points)
-        
-        # vibration based on temperature
-        vibration = calculate_vibration(
-            self.cutting_speed,
-            self.material_hardness,
-            temperature
-        )
-        vibration = add_vibration_noise(vibration)
-        
-        #  tool wear progression
-        tool_wear = calculate_tool_wear(
-            self.cutting_speed,
-            self.material_hardness,
-            temperature,
-            time_points
-        )
-        
-        # making a comprehensive DataFrame
-        return pd.DataFrame({
-            'timestamp': pd.date_range(start='2024-01-15', 
-                                    periods=len(time_points), 
-                                    freq=f'{1000/sample_rate}ms'),
-            'temperature': temperature,
-            'vibration': vibration,
-            'tool_wear': tool_wear,
-            'cutting_speed': self.cutting_speed,
-            'feed_rate': self.feed_rate,
-            'material_hardness': self.material_hardness,
-            'cooling_efficiency': self.cooling_efficiency
-        })
+    def generate_full_dataset(self, duration=1000, sample_rate=1):
+            """
+            generating a complete dataset including all machine parameters and sensor readings to simulate real machine
+            """
+            time_points = np.linspace(0, duration, int(duration * sample_rate))
+            
+            # primary measurements
+            temperature = self.calculate_temperature(time_points)
+            
+            # vibration based on temperature
+            vibration = calculate_vibration(
+                self.cutting_speed,
+                self.material_hardness,
+                temperature
+            )
+            vibration = add_vibration_noise(vibration)
+            
+            #  tool wear progression
+            tool_wear = calculate_tool_wear(
+                self.cutting_speed,
+                self.material_hardness,
+                temperature,
+                time_points
+            )
+            
+            # making a comprehensive DataFrame
+            return pd.DataFrame({
+                'timestamp': pd.date_range(start='2024-01-15', 
+                                        periods=len(time_points), 
+                                        freq=f'{1000/sample_rate}ms'),
+                'temperature': temperature,
+                'vibration': vibration,
+                'tool_wear': tool_wear,
+                'cutting_speed': self.cutting_speed,
+                'feed_rate': self.feed_rate,
+                'material_hardness': self.material_hardness,
+                'cooling_efficiency': self.cooling_efficiency
+            })
