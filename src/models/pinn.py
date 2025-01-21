@@ -34,19 +34,24 @@ class CNCPINN(nn.Module):
         cutting_speed = x[:, 0:1]
         feed_rate = x[:, 1:2]
         material_hardness = x[:, 2:3]
+        t_vals        = x[:, 3:4]
         
-        # constraints -> calculating rate of change here. ; squeeze is to remove unnecessary dimensions
-        temp_gradient = torch.gradient(y_pred.squeeze(), dim=0)[0]
-        
+    
 
         #Constraint1 : temperature should be above 20 else we penalize
         # if temperature is above 20, its fine else we have to penalize
       #### (*) i am making it 20 since thats room temp, but can be changed
         min_temp_violation = torch.relu(20.0 - y_pred)
 
+        dTdt = torch.autograd.grad(
+        y_pred,               # output
+        t_vals,               # wrt this input
+        grad_outputs=torch.ones_like(y_pred),
+        create_graph=True  # allows higher-order grads if needed
+    )[0] 
         #Constraint2 :  to ensure that the rate of temperature change doesn’t exceed a physically realistic limit based on the machine’s cutting speed, feed rate, and material hardness.
         max_heating_rate = 2.0 * cutting_speed * feed_rate * (material_hardness/100)
-        heating_rate_violation = torch.relu(torch.abs(temp_gradient) - max_heating_rate)
+        heating_rate_violation = torch.relu(torch.abs(dTdt) - max_heating_rate)
 
         physics_loss = (
             torch.mean(min_temp_violation) + 
