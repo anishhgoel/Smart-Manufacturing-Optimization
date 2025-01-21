@@ -128,5 +128,6 @@ def prepare_training_data(generator_class, n_samples=1000):
                     outputs.append(temp_val)
     
     x_train = torch.tensor(inputs, dtype=torch.float32)
+    x_train.requires_grad_(True)
     y_train = torch.tensor(outputs, dtype=torch.float32).reshape(-1, 1)
     return x_train, y_train
