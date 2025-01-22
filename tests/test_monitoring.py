@@ -17,7 +17,7 @@ def test_full_system():
     data = generator.generate_full_dataset(duration=3600, sample_rate=1)
     
     # Train PINN model
-    generator.train_with_pinn()
+    generator.train_with_pinn(n_samples=1000)
     
     # Monitor system
     monitor = CNCMonitor()

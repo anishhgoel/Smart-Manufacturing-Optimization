@@ -43,15 +43,16 @@ class CNCPINN(nn.Module):
       #### (*) i am making it 20 since thats room temp, but can be changed
         min_temp_violation = torch.relu(20.0 - y_pred)
 
-        dTdt = torch.autograd.grad(
-        y_pred,               # output
-        t_vals,               # wrt this input
+        grads = torch.autograd.grad(
+        outputs=y_pred,
+        inputs=x,  # differentiate wrt ALL inputs
         grad_outputs=torch.ones_like(y_pred),
-        create_graph=True  # allows higher-order grads if needed
-    )[0] 
+        create_graph=True
+    )[0]  
+        dT_dt = grads[:, 3:4]
         #Constraint2 :  to ensure that the rate of temperature change doesn’t exceed a physically realistic limit based on the machine’s cutting speed, feed rate, and material hardness.
         max_heating_rate = 2.0 * cutting_speed * feed_rate * (material_hardness/100)
-        heating_rate_violation = torch.relu(torch.abs(dTdt) - max_heating_rate)
+        heating_rate_violation = torch.relu(torch.abs(dT_dt) - max_heating_rate)
 
         physics_loss = (
             torch.mean(min_temp_violation) + 

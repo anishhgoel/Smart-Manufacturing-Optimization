@@ -43,7 +43,12 @@ class CNCMonitor:
         # Tool wear prediction
         wear_rate = np.diff(data['tool_wear']).mean()
         current_wear = data['tool_wear'].iloc[-1]
-        time_to_maintenance = (self.tool_wear_threshold - current_wear) / wear_rate
+        if wear_rate <= 0:
+            # edge case: if wear_rate is 0 or negative (shouldn't happen normally)
+            time_to_maintenance_hours = float('inf')  # or 0
+        else:
+            time_to_maintenance_seconds = (self.tool_wear_threshold - current_wear) / wear_rate
+            time_to_maintenance_hours = time_to_maintenance_seconds / 3600.0
         
         # Collect anomalies
         anomalies = {}
@@ -57,7 +62,7 @@ class CNCMonitor:
             is_healthy=len(anomalies) == 0,
             temperature_status=temp_status,
             vibration_status=vibration_status,
-            tool_wear_status=f"Estimated {time_to_maintenance:.1f} hours until maintenance",
-            estimated_maintenance_time=time_to_maintenance,
+            tool_wear_status=f"Estimated {time_to_maintenance_hours:.1f} hours until maintenance",
+            estimated_maintenance_time=time_to_maintenance_hours,
             anomalies=anomalies
         )

@@ -17,12 +17,12 @@ class CNCDataGenerator:
     
     def train_with_pinn(self, n_samples=1000):
         """Train PINN model with generated data"""
-        # Create training data using our generator settings
+        # to create training data using generator settings
         x_train, y_train = prepare_training_data(
-            self.__class__,  # Pass generator class
+            self.__class__,  # generator class (not passing in CNCDataGenerator for flexibility, if I wanna make a sublclass, then it will pick that class)
             n_samples
         )
-        # Initialize and train PINN model
+        # initialize and train PINN model
         self.pinn_model = CNCPINN()
         train_pinn(self.pinn_model, x_train, y_train)
 
