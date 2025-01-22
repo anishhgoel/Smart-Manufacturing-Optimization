@@ -32,7 +32,7 @@ class CNCDataGenerator:
         if seen on grpah, first temperature will rise quickly then approach stability. (more like a logarithmic curve)
         """
         temperature_rise = (
-            4.0 * self.cutting_speed * 
+            2.0 * self.cutting_speed * 
             self.feed_rate * 
             (self.material_hardness / 100)/self.cooling_efficiency
         )
@@ -44,7 +44,7 @@ class CNCDataGenerator:
         # generating random temperature spikes simulate intensive cutting operations
         num_cycles = len(time_points) // 100
         cycle_points = np.random.choice(len(time_points), num_cycles) #timeswhen the temperature spikes start
-        cycle_intensity = np.random.uniform(2.0, 8.0, num_cycles)  # array with intensity for each cycle
+        cycle_intensity = np.random.uniform(1.0, 3.0, num_cycles)  # array with intensity for each cycle
         process_variation = np.zeros_like(time_points)             #will store temperature variation due to spikes
         for point, intensity in zip(cycle_points, cycle_intensity):
             # Create a short temperature spike

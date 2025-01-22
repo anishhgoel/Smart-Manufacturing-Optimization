@@ -5,7 +5,7 @@ def calculate_tool_wear(cutting_speed, material_hardness, temperature, time_poin
     wear and tear over time based on cutting parameters
     """
     wear_rate = (
-        0.001 * cutting_speed *       #scaling factor that can be adjustable to how durable machine is 
+        0.00002 * cutting_speed *       #scaling factor that can be adjustable to how durable machine is 
         (material_hardness / 100) * 
         (temperature / 50)
     )

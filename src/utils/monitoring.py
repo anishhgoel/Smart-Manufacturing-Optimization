@@ -16,7 +16,7 @@ class MachineStatus:
 
 class CNCMonitor:
     def __init__(self, 
-                 temp_threshold=150.0,
+                 temp_threshold=160.0,
                  vibration_threshold=2.0,
                  tool_wear_threshold=0.8):
         self.temp_threshold = temp_threshold
@@ -48,12 +48,22 @@ class CNCMonitor:
             time_to_maintenance_hours = float('inf')  # or 0
         else:
             time_to_maintenance_seconds = (self.tool_wear_threshold - current_wear) / wear_rate
+            time_to_maintenance_seconds = max(time_to_maintenance_seconds, 0)
             time_to_maintenance_hours = time_to_maintenance_seconds / 3600.0
         
         # Collect anomalies
         anomalies = {}
         for column in ['temperature', 'vibration', 'tool_wear']:
-            z_scores = np.abs((data[column] - data[column].mean()) / data[column].std())
+            window_size = 100
+            rolling_mean = data[column].rolling(window=window_size, center=True).mean()
+            rolling_std = data[column].rolling(window=window_size, center=True).std()
+            rolling_mean = rolling_mean.bfill().ffill()
+            rolling_std  = rolling_std.bfill().ffill()
+            
+            rolling_mean = rolling_mean.fillna(method='bfill').fillna(method='ffill')
+            rolling_std  = rolling_std.fillna(method='bfill').fillna(method='ffill')
+            
+            z_scores = np.abs((data[column] - rolling_mean) / rolling_std)
             anomaly_timestamps = data.index[z_scores > 3].tolist()
             if anomaly_timestamps:
                 anomalies[column] = anomaly_timestamps

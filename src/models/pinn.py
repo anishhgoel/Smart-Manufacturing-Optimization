@@ -46,10 +46,10 @@ class CNCPINN(nn.Module):
         grads = torch.autograd.grad(
         outputs=y_pred,
         inputs=x,  # differentiate wrt ALL inputs
-        grad_outputs=torch.ones_like(y_pred),
-        create_graph=True
-    )[0]  
-        dT_dt = grads[:, 3:4]
+        grad_outputs=torch.ones_like(y_pred),   #need to use when output is tensor not a scaler
+        create_graph=True  # for multiplt derivatives
+    )[0]    # usinfg a 0 here as the result was a tuple with the gradient, but needed only gradient without tuple, so used [0] to extract the gradient
+        dT_dt = grads[:, 3:4]        # rate of change of temp w.r.t. time
         #Constraint2 :  to ensure that the rate of temperature change doesn’t exceed a physically realistic limit based on the machine’s cutting speed, feed rate, and material hardness.
         max_heating_rate = 2.0 * cutting_speed * feed_rate * (material_hardness/100)
         heating_rate_violation = torch.relu(torch.abs(dT_dt) - max_heating_rate)
@@ -72,21 +72,21 @@ def train_pinn(model, x_train, y_train, epochs=1000):
     data_criterion = nn.MSELoss()
     
     for epoch in range(epochs):
-        optimizer.zero_grad()
+        optimizer.zero_grad()  # resets the gradients of the model parameters to zero at the start of each epoch
         
         # forward pass
         y_pred = model(x_train)
         
         # calculating losses
-        data_loss = data_criterion(y_pred, y_train)
-        physics_loss = model.physics_loss(x_train, y_pred)
+        data_loss = data_criterion(y_pred, y_train)  #data-driven loss
+        physics_loss = model.physics_loss(x_train, y_pred) #physics based loss
         
         # combine losses
         total_loss = data_loss + 0.1 * physics_loss
         
-        # backward pass and optimization
+        # backward pass
         total_loss.backward()
-        optimizer.step()
+        optimizer.step() # to optimize model parameters based on gradients
         
         if epoch % 100 == 0:
             print(f'Epoch {epoch}: Data Loss = {data_loss.item():.4f}, '
