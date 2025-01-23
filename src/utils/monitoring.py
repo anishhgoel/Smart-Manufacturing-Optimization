@@ -28,19 +28,19 @@ class CNCMonitor:
         Analyzes machine data for potential issues and maintenance needs.
         Uses statistical analysis and threshold-based rules.
         """
-        # Temperature analysis
+        # temperature analysis
         temp_status = "Normal"
         if data['temperature'].max() > self.temp_threshold:
             temp_status = "Warning: High Temperature"
         
-        # Vibration analysis (using statistical outlier detection)
+        # vibration analysis (using statistical outlier detection)
         vibration_mean = data['vibration'].mean()
         vibration_std = data['vibration'].std()
         vibration_status = "Normal"
         if any(data['vibration'] > vibration_mean + 3*vibration_std):
             vibration_status = "Warning: Excessive Vibration"
         
-        # Tool wear prediction
+        # tool wear prediction
         wear_rate = np.diff(data['tool_wear']).mean()
         current_wear = data['tool_wear'].iloc[-1]
         if wear_rate <= 0:
@@ -51,7 +51,7 @@ class CNCMonitor:
             time_to_maintenance_seconds = max(time_to_maintenance_seconds, 0)
             time_to_maintenance_hours = time_to_maintenance_seconds / 3600.0
         
-        # Collect anomalies
+        # collect anomalies
         anomalies = {}
         for column in ['temperature', 'vibration', 'tool_wear']:
             window_size = 100
