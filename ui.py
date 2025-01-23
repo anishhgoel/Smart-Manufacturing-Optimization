@@ -134,3 +134,4 @@ if st.button("Predict Temperature"):
             st.success(f"Predicted Temperature: {pred_temp:.2f} °C")
     else:
         st.error(f"Error: {resp.status_code} {resp.text}")
+

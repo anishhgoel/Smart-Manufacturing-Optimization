@@ -8,6 +8,9 @@ import numpy as np
 from src.data.data_generator import CNCDataGenerator
 from src.models.pinn import CNCPINN, prepare_training_data, train_pinn
 from src.utils.monitoring import CNCMonitor, MachineStatus
+import io
+import base64
+import matplotlib.pyplot as plt
 
 
 app = FastAPI(title="Smart CNC System")
