@@ -6,7 +6,7 @@ import pandas as pd
 
 @dataclass
 class MachineStatus:
-    """Represents the current status of the CNC machine"""
+    # the current status of the CNC machine
     is_healthy: bool
     temperature_status: str
     vibration_status: str
@@ -25,8 +25,7 @@ class CNCMonitor:
     
     def analyze_data(self, data: pd.DataFrame) -> MachineStatus:
         """
-        Analyzes machine data for potential issues and maintenance needs.
-        Uses statistical analysis and threshold-based rules.
+        to analyzes machine data for potential issues and maintenance needs.
         """
         # temperature analysis
         temp_status = "Normal"

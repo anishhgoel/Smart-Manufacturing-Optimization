@@ -14,7 +14,7 @@ feed_rate = st.number_input("Feed Rate (mm/rev)", value=0.2)
 material_hardness = st.number_input("Material Hardness (HB)", value=150.0)
 cooling_efficiency = st.number_input("Cooling Efficiency", value=1.0)
 duration = st.number_input("Duration (seconds)", value=1000.0)
-sample_rate = st.number_input("Sample Rate (Hz)", value=1.0)
+#sample_rate = st.number_input("Sample Rate (Hz)", value=1.0)
 
 if st.button("Simulate Data"):
     payload = {
@@ -24,7 +24,7 @@ if st.button("Simulate Data"):
         "material_hardness": material_hardness,
         "cooling_efficiency": cooling_efficiency,
         "duration": duration,
-        "sample_rate": sample_rate
+       # "sample_rate": sample_rate
     }
     resp = requests.post(f"{API_URL}/simulate", json=payload)
     if resp.status_code == 200:

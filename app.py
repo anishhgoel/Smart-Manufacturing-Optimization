@@ -22,7 +22,7 @@ pinn_model: Optional[CNCPINN] = None
 monitor = CNCMonitor(temp_threshold=160.0, vibration_threshold=2.0, tool_wear_threshold=0.8)
 
 
-# Pydantic Schemas
+# pydantic schemas
 class SimulationParams(BaseModel):
     base_temperature: float = 20.0
     cutting_speed: float = 100.0
@@ -48,17 +48,17 @@ class MonitorParams(BaseModel):
     wear_threshold: float = 0.8
 
 
-# Endpoints
+# endpoints for the dashboard
 
 @app.get("/")
 def root():
     return {"message": "Smart CNC API is running."}
 
-# Simulate / Generate Data
+# simulate / Generate Data
 @app.post("/simulate")
 def simulate_data(params: SimulationParams):
     """
-    Generate synthetic CNC data based on user-specified parameters
+    to generate synthetic CNC data based on user-specified parameters
     and store it globally (latest_data).
     """
     global latest_data
@@ -83,7 +83,7 @@ def simulate_data(params: SimulationParams):
     }
 
 
-#  Train PINN - param sweep approach (on a wide variety of data)
+#   to train PINN for param sweep approach (on a wide variety of data)
 
 @app.post("/train")
 def train_model(train_params: TrainParams):
@@ -95,7 +95,7 @@ def train_model(train_params: TrainParams):
     return {"message": f"PINN trained for {train_params.epochs} epochs on param-sweep"}
 
 
-#  Train PINN - on latest generated data
+#  t train PINN on latest generated data
 
 @app.post("/train_on_latest_data")
 def train_model_on_latest_data(epochs: int = 1000):
@@ -123,7 +123,7 @@ def train_model_on_latest_data(epochs: int = 1000):
     pinn_model = model
     return {"message": f"PINN trained on latest_data for {epochs} epochs", "rows_used": len(df)}
 
-#  Monitor Data- threshold based
+#  monitor Data threshold based
 @app.post("/monitor")
 def monitor_data(params: MonitorParams):
     global latest_data, monitor
@@ -145,7 +145,7 @@ def monitor_data(params: MonitorParams):
         "anomalies": status.anomalies
     }
 
-# Monitor Data with PINN Predictions
+# monitor Data with PINN Predictions
 @app.get("/monitor_with_pinn")
 def monitor_data_with_pinn(residual_threshold: float = 5.0):
     global latest_data, pinn_model
@@ -170,17 +170,17 @@ def monitor_data_with_pinn(residual_threshold: float = 5.0):
     df['predicted_temp'] = preds
     df['residual'] = df['temperature'] - df['predicted_temp']
 
-    # Convert anomalies to *strings* if they're timestamps:
+    # needto convert anomalies to strings if  timestamps
     # or just store them as row numbers, etc.
     anomaly_idx = df.index[abs(df['residual']) > residual_threshold].tolist()
     # If these are Timestamps, do:
     anomaly_strs = [str(ts) for ts in anomaly_idx]
 
-    # Convert to a Python bool, not a numpy.bool_
+    # convert to a Python bool, not a numpy.bool_, previosly caused some issue so keep an eye
     high_temp_warning = bool(df['predicted_temp'].max() > 160.0)
 
-    # If 'timestamp' is a Timestamp column, convert it to string in the preview:
-    # to_dict() sometimes handles it, but let's be explicit:
+    # if timestamp is a Timestamp column, convert it to string in the preview:
+    # to_dict() sometimes handles it, but better to be explicit
     df['timestamp'] = df['timestamp'].astype(str)
 
     head_preview = df[['timestamp','temperature','predicted_temp','residual']].head(5).to_dict(orient="records")
@@ -194,7 +194,7 @@ def monitor_data_with_pinn(residual_threshold: float = 5.0):
         "head_preview": head_preview
     }
 
-#Predict Temperature at a Single Point
+# to predict Temperature at a single point
 @app.post("/predict")
 def predict_temperature(req: PredictParams):
     global pinn_model
